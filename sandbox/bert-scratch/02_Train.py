@@ -8,13 +8,16 @@ from pathlib import Path
 from transformers import DataCollatorForLanguageModeling
 from tokenizers import ByteLevelBPETokenizer
 from transformers import PreTrainedTokenizerFast
+from tokenizers import Tokenizer
 # Tutorial from https://colab.research.google.com/github/huggingface/blog/blob/master/notebooks/01_how_to_train.ipynb#scrollTo=BzMqR-dzF4Ro 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 # tokenizer = RobertaTokenizerFast.from_pretrained("./EsperBERTo", max_len=512)
 # tokenizer = ByteLevelBPETokenizer("models/esperberto-vocab.json","models/esperberto-merges.txt") # ? This actually doesn't work. You will get an error saying tokenizer is not callable. 
 
-tokenizer = PreTrainedTokenizerFast(tokenizer_file="models/byte-level.tokenizer.json")
+tokenizer = PreTrainedTokenizerFast(tokenizer_file='models/BPEtokenizer.json')
+# tokenizer = Tokenizer.from_file('models/BPEtokenizer.json')
+
 mlm=False
 
 config = RobertaConfig(
@@ -44,9 +47,9 @@ data_collator = DataCollatorForLanguageModeling(
 from transformers import Trainer, TrainingArguments
 
 training_args = TrainingArguments(
-    output_dir="model/EsperBERTo-small",
+    output_dir="models/EsperBERTo-small",
     overwrite_output_dir=True,
-    num_train_epochs=1,
+    num_train_epochs=1000,
     per_gpu_train_batch_size=64,
     save_steps=10_000,
     save_total_limit=2,
@@ -56,8 +59,6 @@ trainer = Trainer(
     model=model,
     args=training_args,
     data_collator=data_collator,
-    train_dataset=dataset,
-    prediction_loss_only=True,
-)
+    train_dataset=dataset)
 
 trainer.train()
